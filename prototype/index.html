@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Serye — prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF6E5; --surface:#FFFFFF; --ink:#1B1640; --muted:#6A6390; --line:#E9DDC4;
+  --accent:#E0357A; --gold:#C98A0C; --goldbg:#FFE9B0; --ok:#0F7A5C;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1640; --surface:#26205A; --ink:#FFF6E5; --muted:#B5AEDB; --line:#3A3278;
+    --accent:#FF5A9A; --gold:#F2B632; --goldbg:#3D3160; --ok:#3DD6A3;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1640; --surface:#26205A; --ink:#FFF6E5; --muted:#B5AEDB; --line:#3A3278;
+  --accent:#FF5A9A; --gold:#F2B632; --goldbg:#3D3160; --ok:#3DD6A3;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{max-width:480px;margin:0 auto;min-height:100%;position:relative;padding-bottom:84px}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 6px}
+.brand{font-weight:800;font-size:28px;font-variation-settings:"wdth" 78;letter-spacing:-.5px}
+.brand span{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-left:3px}
+.coinchip{display:flex;align-items:center;gap:6px;background:var(--goldbg);color:var(--ink);border:0;
+  padding:6px 12px;border-radius:999px;font-weight:700}
+.coin{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFE38A,#E0A10E 60%,#A86F00);flex:none}
+h2{font-size:21px;font-weight:750;margin:22px 18px 10px;font-variation-settings:"wdth" 85}
+.row{display:flex;gap:12px;overflow-x:auto;padding:0 18px 4px;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.card{flex:none;width:128px;border:0;background:none;padding:0;text-align:left}
+.card .meta{font-size:13px;color:var(--muted);margin-top:6px}
+.card .t{font-weight:650;font-size:15px;line-height:1.2;margin-top:2px}
+
+/* Posters: banig weave over a two-tone field, the one bold visual element */
+.poster{position:relative;overflow:hidden;border-radius:10px;aspect-ratio:3/4.4;color:#FFF6E5;
+  background:linear-gradient(160deg,var(--c1),var(--c2))}
+.poster::before{content:"";position:absolute;inset:0;opacity:.18;
+  background:repeating-linear-gradient(45deg,#fff 0 2px,transparent 2px 11px),
+             repeating-linear-gradient(-45deg,#fff 0 2px,transparent 2px 11px)}
+.poster svg{position:absolute;right:-12%;top:8%;width:78%;opacity:.9}
+.poster .pt{position:absolute;left:10px;right:10px;bottom:10px;font-weight:800;line-height:.92;
+  font-variation-settings:"wdth" 75;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.poster .ai{position:absolute;left:8px;top:8px;font-size:10px;font-weight:700;background:rgba(0,0,0,.35);
+  padding:2px 6px;border-radius:4px}
+
+.hero{margin:6px 18px 0;display:block;border:0;padding:0;background:none;width:calc(100% - 36px);text-align:left}
+.hero .poster{aspect-ratio:4/4.6;border-radius:16px}
+.hero .poster .pt{font-size:44px;left:18px;bottom:64px}
+.hero .poster .hs{position:absolute;left:18px;right:18px;bottom:18px;font-size:15px;opacity:.95}
+
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;
+  display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav.tabs button{border:0;background:none;padding:10px 0 12px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700}
+nav.tabs svg{width:22px;height:22px}
+
+.detail{padding:0 18px}
+.detail .top2{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:end;margin-top:8px}
+.detail h1{font-size:30px;line-height:1;margin:0 0 6px;font-variation-settings:"wdth" 78;font-weight:800}
+.detail p{margin:12px 0;color:var(--ink)}
+.muted{color:var(--muted)}
+.btn{border:0;border-radius:12px;padding:13px 18px;font-weight:700;background:var(--accent);color:#fff;width:100%}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.gold{background:var(--gold);color:#1B1640}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btnrow{display:grid;grid-template-columns:1fr auto;gap:10px;margin:14px 0}
+.eps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 20px}
+.ep{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 0;font-weight:700;position:relative}
+.ep.locked{color:var(--muted)}
+.ep.locked::after{content:"";position:absolute;right:5px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.ep.done{background:var(--goldbg)}
+.ep.cur{border-color:var(--accent);color:var(--accent)}
+.back{border:0;background:none;padding:14px 18px 4px;font-weight:700;display:flex;gap:6px;align-items:center}
+
+/* Feed */
+.feed{height:calc(100vh - 84px);overflow-y:auto;scroll-snap-type:y mandatory}
+@supports(height:100dvh){.feed{height:calc(100dvh - 84px)}}
+.feeditem{scroll-snap-align:start;height:100%;padding:14px 18px;display:flex;flex-direction:column;gap:12px}
+.feeditem .poster{flex:1;aspect-ratio:auto;border-radius:18px}
+.feeditem .poster .pt{font-size:40px;bottom:18px;left:18px}
+
+/* Wallet & owner */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 18px}
+.big{font-size:44px;font-weight:800;line-height:1;font-variation-settings:"wdth" 80;display:flex;align-items:center;gap:10px}
+.big .coin{width:30px;height:30px}
+.split{display:flex;gap:18px;margin-top:10px;font-size:14px}
+.packs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 18px}
+.pack{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:14px;text-align:left}
+.pack b{font-size:22px;display:flex;align-items:center;gap:6px}
+.pack .bonus{color:var(--ok);font-size:13px;font-weight:700;min-height:18px}
+.pack .price{margin-top:8px;font-weight:700}
+.list{margin:0;padding:0;list-style:none}
+.list li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.list li:last-child{border-bottom:0}
+.pos{color:var(--ok);font-weight:700}.neg{font-weight:700}
+.kv{display:grid;grid-template-columns:1fr auto;gap:8px 12px;font-size:15px}
+.kv .tot{font-weight:800;border-top:1.5px solid var(--line);padding-top:8px}
+.check{font-size:14px;font-weight:700;margin-top:10px}
+.note{font-size:13px;color:var(--muted);margin:6px 18px 0}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+.testbanner{margin:8px 18px 0;padding:8px 12px;border-radius:10px;background:var(--goldbg);font-size:13px}
+
+/* Player — always dark, it is a video surface */
+.player{position:fixed;inset:0;z-index:20;background:#0E0B26;color:#FFF6E5;display:flex;justify-content:center}
+.stage{position:relative;width:100%;max-width:480px;height:100%;overflow:hidden;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.scene{position:absolute;inset:0;background:linear-gradient(170deg,var(--c1),var(--c2) 70%,#0E0B26)}
+.scene::before{content:"";position:absolute;inset:-40%;opacity:.12;
+  background:repeating-linear-gradient(45deg,#fff 0 2px,transparent 2px 14px),repeating-linear-gradient(-45deg,#fff 0 2px,transparent 2px 14px);
+  animation:drift 30s linear infinite}
+.scene svg{position:absolute;left:12%;top:18%;width:76%;opacity:.55}
+@keyframes drift{to{transform:translate(14px,14px)}}
+@media (prefers-reduced-motion: reduce){.scene::before{animation:none}}
+.ptop{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.iconbtn{border:0;background:rgba(0,0,0,.35);color:#FFF6E5;border-radius:999px;padding:8px 12px;font-weight:700;display:flex;gap:6px;align-items:center}
+.caption{position:absolute;left:18px;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);text-align:center;font-size:21px;font-weight:650;
+  text-shadow:0 2px 10px rgba(0,0,0,.6);min-height:64px;z-index:2}
+.pinfo{position:absolute;left:18px;right:90px;bottom:calc(env(safe-area-inset-bottom,0px) + 56px);z-index:2}
+.pinfo b{font-size:18px;font-variation-settings:"wdth" 80}
+.pside{position:absolute;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 56px);display:flex;flex-direction:column;gap:10px;z-index:2}
+.pside .iconbtn{flex-direction:column;gap:2px;font-size:11px;padding:10px}
+.bar{position:absolute;left:18px;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 30px);height:4px;background:rgba(255,255,255,.25);border-radius:2px;z-index:2}
+.bar i{display:block;height:100%;width:0;background:#FFF6E5;border-radius:2px}
+.tapzone{position:absolute;inset:60px 0 190px 0;z-index:1;background:none;border:0}
+.paused{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;z-index:1;pointer-events:none}
+
+/* Sheets */
+.sheetwrap{position:fixed;inset:0;z-index:30;background:rgba(14,11,38,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:480px;background:var(--surface);color:var(--ink);border-radius:20px 20px 0 0;
+  padding:20px 18px calc(env(safe-area-inset-bottom,0px) + 20px);max-height:85%;overflow:auto}
+.sheet h3{margin:0 0 6px;font-size:22px;font-variation-settings:"wdth" 85}
+.sheet .packs{margin:12px 0}
+.sheet .eps{grid-template-columns:repeat(6,1fr)}
+.stack{display:grid;gap:10px;margin-top:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 96px);z-index:40;
+  background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:650;font-size:14px;max-width:90%}
+.empty{margin:30px 18px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div id="layer"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   DEMO PROTOTYPE. All data is local to this browser.
+   Coin rules mirror the planned production design:
+   - Paid coins are held in FIFO purchase lots valued in centavos
+     (integers only, no floating-point money).
+   - Unspent paid coins = deferred revenue (liability).
+   - Revenue is recognized when paid coins unlock an episode.
+   - Bonus coins (sign-up, check-in, ads) carry no cash value.
+   - Every unlock and purchase is idempotent.
+   ============================================================ */
+
+const EPISODE_SECONDS = 12;        // demo clip length
+const NEW_USER_BONUS = 30;
+const CHECKIN_BONUS = 10;
+const AD_BONUS = 5, ADS_PER_DAY = 5;
+const SPEND_ORDER = "bonus-first"; // decision to confirm: "bonus-first" or "paid-first"
+
+const PACKS = [
+  {id:"p20",  priceCentavos:2000,  coins:40,  bonus:0},
+  {id:"p49",  priceCentavos:4900,  coins:100, bonus:10},
+  {id:"p99",  priceCentavos:9900,  coins:210, bonus:30},
+  {id:"p199", priceCentavos:19900, coins:440, bonus:80},
+];
+
+const MOTIFS = {
+  moon:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#FFF6E5" opacity=".85"/><circle cx="64" cy="42" r="34" fill="currentColor" opacity=".55"/></svg>',
+  city:'<svg viewBox="0 0 100 100" fill="#FFF6E5"><rect x="8" y="40" width="14" height="60"/><rect x="26" y="20" width="12" height="80"/><rect x="42" y="50" width="16" height="50"/><rect x="62" y="10" width="10" height="90"/><rect x="76" y="34" width="16" height="66"/><rect x="0" y="86" width="100" height="14" fill="#19B8C9"/></svg>',
+  crown:'<svg viewBox="0 0 100 100"><path d="M10 72 L18 28 L38 52 L50 20 L62 52 L82 28 L90 72 Z" fill="#F2B632"/><rect x="10" y="76" width="80" height="10" fill="#F2B632"/></svg>',
+  eye:'<svg viewBox="0 0 100 100"><path d="M5 50 Q50 5 95 50 Q50 95 5 50 Z" fill="#FFF6E5"/><circle cx="50" cy="50" r="18" fill="#C0392B"/><rect x="47" y="34" width="6" height="32" rx="3" fill="#2B0F2E"/></svg>',
+  star:'<svg viewBox="0 0 100 100"><path d="M50 4 L61 38 L96 38 L68 59 L78 94 L50 73 L22 94 L32 59 L4 38 L39 38 Z" fill="#F2B632"/></svg>',
+  volcano:'<svg viewBox="0 0 100 100"><path d="M0 100 L42 30 L58 30 L100 100 Z" fill="#FFF6E5" opacity=".9"/><path d="M44 30 Q50 6 56 30 Z" fill="#F26B1D"/><circle cx="40" cy="14" r="6" fill="#F26B1D" opacity=".7"/><circle cx="60" cy="10" r="4" fill="#F26B1D" opacity=".6"/></svg>',
+};
+
+/* Original sample series written for this prototype */
+const SERIES = [
+  {id:"diwata", title:"Ang Huling Diwata", genre:"Fantasy", eps:60, free:5, price:12, c1:"#0F5C4D", c2:"#E0357A", motif:"moon",
+   tagline:"She heals patients by day. The mountain calls her by night.",
+   synopsis:"Liwayway is a night-shift nurse in Quezon City who learns she is the last diwata of Mount Banahaw — and the mining company tearing the mountain apart already knows who she is.",
+   lines:["Hindi ka ordinaryong tao, Liwayway.","Ang bundok ay umiiyak. Naririnig mo ba?","Bukas ng gabi, babalik sila.","Sino ang nagpadala sa'yo dito?","Kung aalis ka, mamamatay ang gubat.","Nakita ko na ang mukha niya… sa panaginip ko.","Huwag mong hawakan ang bato!","Matagal ka na naming hinahanap.","May isa pang diwata. At galit siya."]},
+  {id:"maynila2099", title:"Maynila 2099", genre:"Sci-fi", eps:80, free:5, price:12, c1:"#1E2A78", c2:"#19B8C9", motif:"city",
+   tagline:"Half the city is underwater. He just found the switch.",
+   synopsis:"In a flooded Manila, jeepney-boat driver Nonoy finds a chip left on his seat. It can shut down the water barons who own every drop — and now they own a bounty on his head.",
+   lines:["Sino ang may-ari ng chip na 'to?","Tatlong araw na lang bago ang Bagyong Omega.","Hindi pera ang kailangan ko. Tubig.","Sumakay ka na, bilis!","Naka-lock ang buong Intramuros.","Ikaw pala ang sinasabi nila.","Kapag pinindot mo 'yan, walang babalikan.","Kilala mo ba kung sino ang tatay mo?","Nasa loob pa ng dome ang kapatid ko."]},
+  {id:"tagapagmana", title:"Ang Tagapagmana", genre:"Revenge", eps:70, free:5, price:12, c1:"#5B1A3A", c2:"#F2B632", motif:"crown",
+   tagline:"Thrown out as the maid. Back as the owner.",
+   synopsis:"Rosa was accused of theft and thrown out of the Villaverde mansion. Ten years later she returns with a new name, a fortune, and the will that proves the mansion was always hers.",
+   lines:["Umalis ka sa pamamahay ko!","Sampung taon. Hindi ko nakalimutan.","Ako na ang may-ari ng kumpanyang ito.","Ang testamento… nasaan ang testamento?","Hindi mo ako kilala, Señora.","May kopya ang abogado ni Lolo.","Ngayon, ikaw naman ang luluhod.","Siya ang tunay na apo.","Hindi pa tapos ang laro."]},
+  {id:"aswang", title:"Aswang sa Ortigas", genre:"Supernatural", eps:60, free:5, price:12, c1:"#2B0F2E", c2:"#C0392B", motif:"eye",
+   tagline:"Her team leader never eats. And never ages.",
+   synopsis:"Call-center agent Bea works the graveyard shift in Ortigas. When her officemates start disappearing before payday, she realizes her team leader has been working nights for a hundred years.",
+   lines:["Bakit hindi ka kumakain, Sir?","Hindi siya lumalabas sa CCTV.","Tatlong agent na ang nawala ngayong buwan.","Amoy bawang ka, Bea.","Huwag kang lilingon.","Nasa elevator siya… pero nasa 30th floor din siya.","Ang lola ko ang nagturo sa'kin nito.","Hindi ka makakaalis bago mag-alas-sais.","Pumirma ka na sa kontrata."]},
+  {id:"bituin", title:"Bantay ng Bituin", genre:"Space adventure", eps:50, free:5, price:12, c1:"#10204A", c2:"#F2B632", motif:"star",
+   tagline:"The first Filipino on a Mars cargo crew. Stranded.",
+   synopsis:"Engineer Migo takes a Mars cargo contract to support his family in Iloilo. A crash leaves him stranded with a smuggler, a broken ship, and a package from home he was never supposed to open.",
+   lines:["Nay, uuwi ako. Pangako.","Apatnapung minuto na lang ang oxygen.","Ano'ng laman ng kahon na 'to?","Hindi lang tayo ang tao dito.","Walang signal mula sa Earth.","Ikaw ang huling pag-asa ng barko.","Kilala ko ang boses na 'yan.","May tumatawag mula sa ilalim ng yelo.","Buksan mo na."]},
+  {id:"bulkan", title:"Anak ng Bulkan", genre:"Fantasy action", eps:60, free:5, price:12, c1:"#4A1C0A", c2:"#F26B1D", motif:"volcano",
+   tagline:"He can call fire from Mayon. Three kingdoms want him dead.",
+   synopsis:"Tomas, a fisherman's son from Albay, wakes the fire inside Mayon on his eighteenth birthday. Now the kingdoms of sea, sky and forest are racing to claim him — or bury him.",
+   lines:["Hindi ka anak ng mangingisda.","Ang apoy ay sumusunod sa'yo.","Dumating na ang hukbo ng dagat.","Kapag sumabog ang bulkan, sabay tayong mamamatay.","Sino ka ba talaga?","Hawakan mo ang kamay ko!","Tatlong kaharian. Isang korona.","Huwag mong gisingin ang natutulog.","Ako ang tunay mong ama."]},
+];
+const byId = Object.fromEntries(SERIES.map(s => [s.id, s]));
+
+/* ---------------- State & persistence ---------------- */
+const KEY = "serye.demo.v1";
+function freshState(){
+  return {
+    lots: [],                 // paid coin lots: {id, coins, valueCentavos, originalCoins, originalCentavos}
+    bonus: NEW_USER_BONUS,    // bonus coins (no cash value)
+    ledger: [{id:uid(), ts:Date.now(), type:"bonus", label:"Welcome bonus", paid:0, bonus:NEW_USER_BONUS, cash:0, recognized:0}],
+    unlocked: {},             // seriesId -> [episode numbers]
+    progress: {},             // seriesId -> last episode watched
+    myList: [],
+    lastCheckin: null,
+    ads: {date:null, count:0},
+    processed: [],            // idempotency keys already applied
+    revenueBySeries: {},      // seriesId -> centavos
+  };
+}
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return freshState();
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+let S = load();
+
+/* ---------------- Money helpers (integers only) ---------------- */
+function peso(c){ const neg = c < 0; c = Math.abs(c);
+  const s = Math.floor(c/100).toLocaleString("en-PH") + "." + String(c%100).padStart(2,"0");
+  return (neg?"−":"") + "₱" + s; }
+const paidCoins = () => S.lots.reduce((a,l)=>a+l.coins,0);
+const totalCoins = () => paidCoins() + S.bonus;
+const today = () => new Date().toISOString().slice(0,10);
+
+/* ---------------- Domain operations ---------------- */
+function isFree(s, ep){ return ep <= s.free; }
+function isUnlocked(s, ep){ return isFree(s, ep) || (S.unlocked[s.id]||[]).includes(ep); }
+
+function consumePaid(n){
+  let recognized = 0, used = 0;
+  for(const lot of S.lots){
+    if(n === 0) break;
+    if(lot.coins === 0) continue;
+    const k = Math.min(n, lot.coins);
+    // Last coins of a lot take the remaining value, so rounding never leaks.
+    const rec = (k === lot.coins) ? lot.valueCentavos : Math.floor(lot.valueCentavos * k / lot.coins);
+    lot.coins -= k; lot.valueCentavos -= rec; recognized += rec; used += k; n -= k;
+  }
+  S.lots = S.lots.filter(l => l.coins > 0);
+  return {used, recognized};
+}
+
+function unlockEpisode(s, ep){
+  const key = "unlock:" + s.id + ":" + ep;
+  if(isUnlocked(s, ep) || S.processed.includes(key)) return {ok:true, already:true};
+  if(totalCoins() < s.price) return {ok:false, reason:"insufficient"};
+  let need = s.price, bonusUsed = 0, paid = {used:0, recognized:0};
+  if(SPEND_ORDER === "bonus-first"){
+    bonusUsed = Math.min(S.bonus, need); S.bonus -= bonusUsed; need -= bonusUsed;
+    paid = consumePaid(need);
+  } else {
+    paid = consumePaid(Math.min(need, paidCoins())); need -= paid.used;
+    bonusUsed = need; S.bonus -= bonusUsed;
+  }
+  (S.unlocked[s.id] ||= []).push(ep);
+  S.revenueBySeries[s.id] = (S.revenueBySeries[s.id]||0) + paid.recognized;
+  S.processed.push(key);
+  S.ledger.push({id:uid(), ts:Date.now(), type:"unlock", label:s.title+" · Ep "+ep, paid:-paid.used, bonus:-bonusUsed, cash:0, recognized:paid.recognized, series:s.id});
+  save(); return {ok:true};
+}
+
+function buyPack(packId){
+  // In production this runs server-side after PayMongo / Google Play confirms payment.
+  const p = PACKS.find(x=>x.id===packId); if(!p) return;
+  const key = "pay:" + uid();       // stands in for the gateway's payment reference
+  if(S.processed.includes(key)) return;
+  S.lots.push({id:key, coins:p.coins, valueCentavos:p.priceCentavos, originalCoins:p.coins, originalCentavos:p.priceCentavos});
+  S.bonus += p.bonus;
+  S.processed.push(key);
+  S.ledger.push({id:uid(), ts:Date.now(), type:"purchase", label:"Top-up "+peso(p.priceCentavos)+" (test)", paid:p.coins, bonus:p.bonus, cash:p.priceCentavos, recognized:0});
+  save();
+}
+
+function grantBonus(label, n){
+  S.bonus += n;
+  S.ledger.push({id:uid(), ts:Date.now(), type:"bonus", label, paid:0, bonus:n, cash:0, recognized:0});
+  save();
+}
+function checkin(){
+  if(S.lastCheckin === today()) return false;
+  S.lastCheckin = today(); grantBonus("Daily check-in", CHECKIN_BONUS); return true;
+}
+function adsLeft(){ return S.ads.date === today() ? ADS_PER_DAY - S.ads.count : ADS_PER_DAY; }
+
+function books(){
+  const cash = S.ledger.reduce((a,e)=>a+e.cash,0);
+  const recognized = S.ledger.reduce((a,e)=>a+e.recognized,0);
+  const deferred = S.lots.reduce((a,l)=>a+l.valueCentavos,0);
+  const bonusIssued = S.ledger.filter(e=>e.bonus>0).reduce((a,e)=>a+e.bonus,0);
+  return {cash, recognized, deferred, bonusIssued, ties: cash === recognized + deferred};
+}
+
+/* ---------------- Rendering helpers ---------------- */
+const $app = document.getElementById("app"), $layer = document.getElementById("layer");
+let view = {name:"home"};
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function poster(s, size){
+  return `<div class="poster" style="--c1:${s.c1};--c2:${s.c2};color:#FFF6E5">
+    <span class="ai">AI-made</span>${MOTIFS[s.motif]}
+    <div class="pt" style="font-size:${size||20}px">${esc(s.title)}</div></div>`;
+}
+const coinChip = () => `<button class="coinchip" data-go="wallet" aria-label="Coins: ${totalCoins()}. Open wallet"><span class="coin"></span>${totalCoins()}</button>`;
+const ICON = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+  feed:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+  wallet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5h4.5a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3H15"/></svg>',
+};
+function tabs(active){
+  const t = [["home","Home"],["feed","Para sa'yo"],["list","My list"],["wallet","Coins"]];
+  return `<nav class="tabs">${t.map(([k,l])=>`<button data-go="${k}" ${active===k?'aria-current="page"':''}>${ICON[k]}${l}</button>`).join("")}</nav>`;
+}
+function card(s){
+  const p = S.progress[s.id];
+  return `<button class="card" data-series="${s.id}">${poster(s,19)}
+    <div class="t">${esc(s.title)}</div><div class="meta">${p?`Ep ${p} of ${s.eps}`:`${s.genre}, ${s.eps} eps`}</div></button>`;
+}
+
+/* ---------------- Screens ---------------- */
+function render(){
+  const v = view.name;
+  if(v==="home") $app.innerHTML = homeView();
+  else if(v==="series") $app.innerHTML = seriesView(byId[view.id]);
+  else if(v==="feed") $app.innerHTML = feedView();
+  else if(v==="list") $app.innerHTML = listView();
+  else if(v==="wallet") $app.innerHTML = walletView();
+  else if(v==="owner") $app.innerHTML = ownerView();
+}
+function homeView(){
+  const hero = SERIES[0];
+  const cont = SERIES.filter(s=>S.progress[s.id]);
+  const genreRow = (label, ids) => `<h2>${label}</h2><div class="row">${ids.map(id=>card(byId[id])).join("")}</div>`;
+  return `<header class="top"><div class="brand">Serye<span></span></div>${coinChip()}</header>
+  <button class="hero" data-series="${hero.id}">
+    <div class="poster" style="--c1:${hero.c1};--c2:${hero.c2}"><span class="ai">AI-made</span>${MOTIFS[hero.motif]}
+      <div class="pt">${esc(hero.title)}</div><div class="hs">${esc(hero.tagline)}</div></div></button>
+  ${cont.length?`<h2>Continue watching</h2><div class="row">${cont.map(card).join("")}</div>`:""}
+  ${genreRow("Trending ngayon", ["tagapagmana","aswang","maynila2099","bulkan"])}
+  ${genreRow("Mahika at alamat", ["diwata","bulkan","aswang"])}
+  ${genreRow("Sci-fi at kalawakan", ["maynila2099","bituin"])}
+  <div style="height:12px"></div>${tabs("home")}`;
+}
+function seriesView(s){
+  const cur = S.progress[s.id] || 0;
+  const inList = S.myList.includes(s.id);
+  const next = Math.min(cur+1 || 1, s.eps);
+  const eps = Array.from({length:s.eps},(_,i)=>i+1).map(ep=>{
+    const cls = ["ep"]; if(!isUnlocked(s,ep)) cls.push("locked"); if(ep<cur) cls.push("done"); if(ep===cur) cls.push("cur");
+    return `<button class="${cls.join(" ")}" data-play="${s.id}" data-ep="${ep}" aria-label="Episode ${ep}${isUnlocked(s,ep)?"":", locked"}">${ep}</button>`;
+  }).join("");
+  return `<button class="back" data-go="home">‹ Back</button>
+  <div class="detail">
+    <div class="top2">${poster(s,18)}<div><h1>${esc(s.title)}</h1><div class="muted">${s.genre}, ${s.eps} episodes</div>
+      <div class="muted">Episodes 1–${s.free} free, then ${s.price} coins each</div></div></div>
+    <p>${esc(s.synopsis)}</p>
+    <div class="btnrow"><button class="btn" data-play="${s.id}" data-ep="${cur?cur:1}">${cur?`Continue episode ${cur}`:"Play episode 1"}</button>
+      <button class="btn ghost" data-mylist="${s.id}" aria-pressed="${inList}">${inList?"In my list":"Add to list"}</button></div>
+    <h2 style="margin:18px 0 0">Episodes</h2><div class="eps">${eps}</div>
+  </div>${tabs("")}`;
+}
+function feedView(){
+  return `<div class="feed">${SERIES.map(s=>`<section class="feeditem">
+    <div class="poster" style="--c1:${s.c1};--c2:${s.c2}"><span class="ai">AI-made</span>${MOTIFS[s.motif]}<div class="pt">${esc(s.title)}</div></div>
+    <div><b>${esc(s.tagline)}</b><div class="muted">${s.genre}, ${s.eps} episodes, first ${s.free} free</div></div>
+    <button class="btn" data-play="${s.id}" data-ep="1">Watch episode 1</button></section>`).join("")}</div>${tabs("feed")}`;
+}
+function listView(){
+  const items = S.myList.map(id=>byId[id]).filter(Boolean);
+  return `<header class="top"><div class="brand">My list</div>${coinChip()}</header>
+  ${items.length?`<div class="row" style="flex-wrap:wrap">${items.map(card).join("")}</div>`
+   :`<div class="empty">Series you save appear here. Open a series and choose Add to list.</div>`}${tabs("list")}`;
+}
+function packsHTML(){
+  return `<div class="packs">${PACKS.map(p=>`<button class="pack" data-buy="${p.id}">
+    <b><span class="coin"></span>${p.coins}</b><div class="bonus">${p.bonus?`+${p.bonus} bonus`:""}</div>
+    <div class="price">${peso(p.priceCentavos)}</div></button>`).join("")}</div>`;
+}
+function walletView(){
+  const left = adsLeft(), checked = S.lastCheckin === today();
+  const hist = S.ledger.slice().reverse().slice(0,12).map(e=>{
+    const d = e.paid + e.bonus;
+    return `<li><span>${esc(e.label)}</span><span class="${d>=0?"pos":"neg"}">${d>=0?"+":""}${d}</span></li>`;
+  }).join("");
+  return `<header class="top"><div class="brand">Coins</div></header>
+  <div class="testbanner">Test mode. Top-ups are simulated; no money is charged.</div>
+  <div class="panel"><div class="big"><span class="coin"></span>${totalCoins()}</div>
+    <div class="split"><span>Coins: <b>${paidCoins()}</b></span><span>Bonus: <b>${S.bonus}</b></span></div></div>
+  <h2>Top up</h2>${packsHTML()}
+  <h2>Free coins</h2>
+  <div class="panel"><div class="stack" style="margin:0">
+    <button class="btn gold" data-checkin ${checked?"disabled":""}>${checked?"Checked in today":`Check in for ${CHECKIN_BONUS} free coins`}</button>
+    <button class="btn ghost" data-ad ${left<=0?"disabled":""}>${left>0?`Watch an ad for ${AD_BONUS} coins (${left} left today)`:"No more ads today"}</button>
+  </div></div>
+  <h2>History</h2><div class="panel"><ul class="list">${hist}</ul></div>
+  <div class="panel"><button class="btn ghost" data-go="owner">Open owner view (books)</button></div>
+  ${tabs("wallet")}`;
+}
+function ownerView(){
+  const b = books();
+  const rows = SERIES.map(s=>{
+    const unl = (S.unlocked[s.id]||[]).length;
+    return `<tr><td>${esc(s.title)}</td><td>${unl}</td><td>${peso(S.revenueBySeries[s.id]||0)}</td></tr>`;
+  }).join("");
+  const led = S.ledger.slice().reverse().map(e=>`<tr><td>${new Date(e.ts).toLocaleString("en-PH",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</td>
+    <td style="text-align:left">${esc(e.label)}</td><td>${e.paid}</td><td>${e.bonus}</td><td>${peso(e.cash)}</td><td>${peso(e.recognized)}</td></tr>`).join("");
+  return `<button class="back" data-go="wallet">‹ Back</button>
+  <header class="top" style="padding-top:0"><div class="brand">Owner view</div></header>
+  <div class="panel"><div class="kv">
+    <span>Cash received from top-ups</span><b>${peso(b.cash)}</b>
+    <span>Recognized revenue (coins spent)</span><b>${peso(b.recognized)}</b>
+    <span>Deferred revenue (unspent paid coins)</span><b>${peso(b.deferred)}</b>
+    <span class="tot">Recognized + deferred</span><b class="tot">${peso(b.recognized+b.deferred)}</b>
+  </div><div class="check" style="color:${b.ties?"var(--ok)":"var(--accent)"}">${b.ties?"Ties out: cash equals recognized plus deferred.":"Does not tie out. Check the ledger."}</div></div>
+  <div class="panel"><div class="kv">
+    <span>Unspent paid coins</span><b>${paidCoins()}</b>
+    <span>Unspent bonus coins (no cash value)</span><b>${S.bonus}</b>
+    <span>Bonus coins issued to date</span><b>${b.bonusIssued}</b>
+    <span>Spend order</span><b>${SPEND_ORDER==="bonus-first"?"Bonus first":"Paid first"}</b>
+  </div></div>
+  <h2>Revenue by series</h2><div class="panel tablewrap"><table><thead><tr><th>Series</th><th>Unlocks</th><th>Revenue</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <h2>Coin ledger</h2><div class="panel tablewrap"><table><thead><tr><th>When</th><th style="text-align:left">Entry</th><th>Paid</th><th>Bonus</th><th>Cash</th><th>Revenue</th></tr></thead><tbody>${led}</tbody></table></div>
+  <p class="note">Amounts are stored as whole centavos. The last coins of each top-up carry its remaining value, so rounding never leaves a centavo behind.</p>
+  <div class="panel"><button class="btn ghost" data-reset>Reset demo data</button></div>
+  ${tabs("wallet")}`;
+}
+
+/* ---------------- Player ---------------- */
+let P = null; // {s, ep, t, playing, timer}
+function openPlayer(s, ep){
+  closePlayer(true);
+  P = {s, ep, t:0, playing:true, timer:null};
+  if(!isUnlocked(s, ep)){ drawPlayer(); lockSheet(); return; }
+  S.progress[s.id] = ep; save();
+  drawPlayer(); tick();
+}
+function drawPlayer(){
+  const {s, ep} = P;
+  const lines = [0,1,2].map(i => s.lines[(ep*3+i) % s.lines.length]);
+  const idx = Math.min(2, Math.floor(P.t / (EPISODE_SECONDS/3)));
+  const inList = S.myList.includes(s.id);
+  let el = document.getElementById("player");
+  if(!el){ el = document.createElement("div"); el.id="player"; el.className="player"; el.setAttribute("role","dialog"); el.setAttribute("aria-label","Player"); document.body.appendChild(el); }
+  el.innerHTML = `<div class="stage">
+    <div class="scene" style="--c1:${s.c1};--c2:${s.c2}">${MOTIFS[s.motif]}</div>
+    <button class="tapzone" data-toggle aria-label="${P.playing?"Pause":"Play"}"></button>
+    ${P.playing?"":'<div class="paused">Paused</div>'}
+    <div class="ptop"><button class="iconbtn" data-close>‹ ${esc(s.title)}</button><button class="iconbtn" data-go-wallet><span class="coin"></span>${totalCoins()}</button></div>
+    <div class="caption" aria-live="polite">${isUnlocked(s,ep)?esc(lines[idx]):""}</div>
+    <div class="pinfo"><b>Episode ${ep}</b><div style="font-size:14px;opacity:.85">${esc(s.tagline)}</div><div style="font-size:12px;opacity:.7;margin-top:4px">Demo clip. AI video plays here in the real app.</div></div>
+    <div class="pside">
+      <button class="iconbtn" data-prev aria-label="Previous episode">▲<span>Prev</span></button>
+      <button class="iconbtn" data-epsheet aria-label="All episodes">☰<span>Eps</span></button>
+      <button class="iconbtn" data-mylist="${s.id}" aria-pressed="${inList}">${inList?"★":"☆"}<span>List</span></button>
+      <button class="iconbtn" data-next aria-label="Next episode">▼<span>Next</span></button>
+    </div>
+    <div class="bar"><i style="width:${Math.min(100,P.t/EPISODE_SECONDS*100)}%"></i></div>
+  </div>`;
+}
+function tick(){
+  clearInterval(P.timer);
+  P.timer = setInterval(()=>{
+    if(!P || !P.playing) return;
+    P.t += 0.25;
+    if(P.t >= EPISODE_SECONDS){ nextEp(); return; }
+    drawPlayer();
+  }, 250);
+}
+function nextEp(){
+  if(!P) return;
+  const {s, ep} = P;
+  if(ep >= s.eps){ clearInterval(P.timer); P.playing=false; drawPlayer(); toast("You finished the series."); return; }
+  openPlayer(s, ep+1);
+}
+function prevEp(){ if(P && P.ep > 1) openPlayer(P.s, P.ep-1); }
+function closePlayer(silent){
+  if(P) clearInterval(P.timer);
+  P = null; const el = document.getElementById("player"); if(el) el.remove();
+  closeSheet();
+  if(!silent) render();
+}
+
+/* ---------------- Sheets ---------------- */
+function sheet(html){ $layer.innerHTML = `<div class="sheetwrap" data-sheetbg><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  const f = $layer.querySelector("button"); if(f) f.focus(); }
+function closeSheet(){ $layer.innerHTML = ""; }
+function lockSheet(){
+  const {s, ep} = P; clearInterval(P.timer); P.playing = false;
+  const enough = totalCoins() >= s.price;
+  sheet(`<h3>Episode ${ep} is locked</h3>
+    <div class="muted">Unlock it for ${s.price} coins. You have ${totalCoins()}.</div>
+    <div class="stack">
+      ${enough?`<button class="btn" data-unlock>Unlock episode ${ep}</button>`:`<div><b>You need ${s.price-totalCoins()} more coins.</b></div>`}
+      ${enough?"":packsHTML()}
+      <button class="btn ghost" data-ad ${adsLeft()<=0?"disabled":""}>${adsLeft()>0?`Watch an ad for ${AD_BONUS} coins`:"No more ads today"}</button>
+      <button class="btn ghost" data-close>Not now</button>
+    </div>`);
+}
+function episodesSheet(){
+  const {s, ep} = P;
+  sheet(`<h3>${esc(s.title)}</h3><div class="muted">Episodes 1–${s.free} free</div>
+    <div class="eps">${Array.from({length:s.eps},(_,i)=>i+1).map(n=>`<button class="ep ${isUnlocked(s,n)?"":"locked"} ${n===ep?"cur":""}" data-play="${s.id}" data-ep="${n}">${n}</button>`).join("")}</div>
+    <button class="btn ghost" data-closesheet>Close</button>`);
+}
+function adSheet(then){
+  if(adsLeft() <= 0) return;
+  let n = 5;
+  sheet(`<h3>Sponsored</h3><div class="muted">Your ad would play here.</div><div class="big" style="margin:20px 0" id="adcount">${n}</div>
+    <button class="btn ghost" disabled id="adbtn">Collect ${AD_BONUS} coins</button>`);
+  const iv = setInterval(()=>{
+    n--; const c = document.getElementById("adcount"); if(!c){ clearInterval(iv); return; }
+    c.textContent = n;
+    if(n <= 0){ clearInterval(iv); const b = document.getElementById("adbtn"); b.disabled = false; b.focus();
+      b.onclick = () => {
+        if(S.ads.date !== today()) S.ads = {date:today(), count:0};
+        S.ads.count++; grantBonus("Watched an ad", AD_BONUS); closeSheet(); toast(`+${AD_BONUS} bonus coins`); then && then();
+      }; }
+  }, 1000);
+}
+
+let toastT;
+function toast(msg){ clearTimeout(toastT); let t = document.getElementById("toast");
+  if(!t){ t = document.createElement("div"); t.id="toast"; t.className="toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
+  t.textContent = msg; toastT = setTimeout(()=>t.remove(), 2200); }
+
+/* ---------------- Events ---------------- */
+let busy = false; // guards double taps on money actions
+document.addEventListener("click", e => {
+  const b = e.target.closest("button, [data-sheetbg]"); if(!b) return;
+  const d = b.dataset;
+  if(d.sheetbg !== undefined && e.target === b){ closeSheet(); if(P && !P.playing && isUnlocked(P.s,P.ep)){ P.playing = true; drawPlayer(); tick(); } return; }
+  if(d.go){ closePlayer(true); view = {name:d.go}; render(); window.scrollTo(0,0); return; }
+  if(d.series){ view = {name:"series", id:d.series}; render(); window.scrollTo(0,0); return; }
+  if(d.play){ closeSheet(); openPlayer(byId[d.play], +d.ep); return; }
+  if(d.mylist){ const i = S.myList.indexOf(d.mylist); i>=0 ? S.myList.splice(i,1) : S.myList.push(d.mylist); save();
+    toast(i>=0?"Removed from my list":"Added to my list"); P ? drawPlayer() : render(); return; }
+  if(d.close !== undefined){ closePlayer(false); return; }
+  if(d.closesheet !== undefined){ closeSheet(); return; }
+  if(d.goWallet !== undefined){ closePlayer(true); view = {name:"wallet"}; render(); return; }
+  if(d.toggle !== undefined && P){ P.playing = !P.playing; drawPlayer(); return; }
+  if(d.next !== undefined){ nextEp(); return; }
+  if(d.prev !== undefined){ prevEp(); return; }
+  if(d.epsheet !== undefined && P){ P.playing = false; drawPlayer(); episodesSheet(); return; }
+  if(d.unlock !== undefined && P){
+    if(busy) return; busy = true;
+    const r = unlockEpisode(P.s, P.ep); busy = false;
+    if(r.ok){ closeSheet(); toast(r.already?"Already unlocked":`Episode ${P.ep} unlocked`); openPlayer(P.s, P.ep); }
+    else lockSheet();
+    return;
+  }
+  if(d.buy){
+    if(busy) return; busy = true; buyPack(d.buy); busy = false;
+    toast("Coins added (test mode)");
+    if(P) lockSheet(); else render(); return;
+  }
+  if(d.checkin !== undefined){ if(checkin()) toast(`+${CHECKIN_BONUS} bonus coins`); render(); return; }
+  if(d.ad !== undefined){ adSheet(() => { if(P) lockSheet(); else render(); }); return; }
+  if(d.reset !== undefined){ if(confirm("Reset all demo coins, unlocks and history?")){ S = freshState(); save(); render(); toast("Demo data reset"); } return; }
+});
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape"){ if($layer.innerHTML) closeSheet(); else if(P) closePlayer(false); }
+  if(!P || $layer.innerHTML) return;
+  if(e.key === "ArrowDown") nextEp();
+  if(e.key === "ArrowUp") prevEp();
+  if(e.key === " "){ e.preventDefault(); P.playing = !P.playing; drawPlayer(); }
+});
+let touchY = null;
+document.addEventListener("touchstart", e => { if(P && !$layer.innerHTML) touchY = e.touches[0].clientY; }, {passive:true});
+document.addEventListener("touchend", e => {
+  if(touchY === null || !P) return; const dy = e.changedTouches[0].clientY - touchY; touchY = null;
+  if(dy < -60) nextEp(); else if(dy > 60) prevEp();
+}, {passive:true});
+
+render();
+</script>
+</body>
+</html>
